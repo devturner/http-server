@@ -7,6 +7,7 @@ name = "pypi"
 pytest = "*"
 cowpy = "*"
 request = "*"
+requests = "*"
 
 [dev-packages]
 

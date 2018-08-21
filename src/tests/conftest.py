@@ -1,7 +1,6 @@
 from multiprocessing import Process
-from .. import server
+from src import server
 import pytest
-
 
 @pytest.fixture(scope='session', autouse=True)
 def server_setup():
