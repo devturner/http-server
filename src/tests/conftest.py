@@ -2,6 +2,7 @@ from multiprocessing import Process
 from src import server
 import pytest
 
+
 @pytest.fixture(scope='session', autouse=True)
 def server_setup():
     instance = server.create_server()

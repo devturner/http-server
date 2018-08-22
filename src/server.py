@@ -1,12 +1,35 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 import os
+from cowpy import cow
+import json
 
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed_path = urlparse(self.path)
         parsed_qs = parse_qs(parsed_path.query)
+        cowpyy = cow.Moose()
+
+        raw_html = '''<!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title> cowsay </title>
+                        </head>
+                        <body>
+                            <header>
+                                <nav>
+                                <ul>
+                                    <li><a href="/cow">cowsay</a></li>
+                                </ul>
+                                </nav>
+                            <header>
+                            <main>
+                               <p> This is a funny server that can give you a
+                               cow</p>
+                            </main>
+                        </body>
+                        </html>'''
 
         # set a status code
         # set any headers
@@ -17,7 +40,17 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'text/html')
             self.end_headers()
-            self.wfile.write(b'<html><body><h1>Hello world</h1></body></html>')
+            self.wfile.write(raw_html.encode())
+            return
+
+        if parsed_path.path == '/cow':
+            msg = cowpyy.milk(parsed_qs['msg'][0])
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html')
+            self.end_headers()
+            # msg = cowpyy.milk("My witty message")
+            print(msg)
+            self.wfile.write(f'''<html><body>{msg}</body></html>'''.encode())
             return
 
         elif parsed_path.path == '/banana':
