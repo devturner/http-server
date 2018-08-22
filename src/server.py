@@ -3,14 +3,13 @@ from urllib.parse import urlparse, parse_qs
 import os
 from cowpy import cow
 import json
+import html.parser
 
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed_path = urlparse(self.path)
         parsed_qs = parse_qs(parsed_path.query)
-        cowpyy = cow.Moose()
-
         raw_html = '''<!DOCTYPE html>
                         <html>
                         <head>
@@ -43,25 +42,65 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(raw_html.encode())
             return
 
-        if parsed_path.path == '/cow':
-            msg = cowpyy.milk(parsed_qs['msg'][0])
-            self.send_response(200)
+        elif parsed_path.path == '/cow':
+            try:
+                if len(parsed_qs['msg'][0]) < 1:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'text/html')
+                    self.end_headers()
+                    self.wfile.write(b'400 Bad Request')
+                    return
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html')
+                self.end_headers()
+                cowpyy = cow.Kitty()
+                msg = cowpyy.milk(parsed_qs['msg'][0])
+                self.wfile.write(f'''<html><body>{msg}</body></html>'''.encode("utf-8"))
+                return
+
+            except KeyError:
+                self.send_response(400)
+                self.send_header('Content-Type', 'text/html')
+                self.end_headers()
+                self.wfile.write(b'400 bad request')
+                return
+
+        else:
+            self.send_response(404)
             self.send_header('Content-Type', 'text/html')
             self.end_headers()
-            # msg = cowpyy.milk("My witty message")
-            print(msg)
-            self.wfile.write(f'''<html><body>{msg}</body></html>'''.encode())
+            self.wfile.write(b'404 content not found')
             return
-
-        elif parsed_path.path == '/banana':
-            pass
 
         self.send_response(404)
         self.end_headers()
 
     def do_POST(self):
-        pass
+        parsed_path = urlparse(self.path)
+        parsed_qs = parse_qs(parsed_path.query)
 
+        if parsed_path.path == '/cow':
+            try:
+                cowpyy = cow.Kitty()
+                msg = cowpyy.milk(parsed_qs['msg'][0])
+                jcow = json.dumps(msg)
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(f'''{jcow}'''.encode())
+                return
+            except KeyError:
+                send.response(400)
+                send.header('Content-Type', 'text/html')
+                self.end_headers()
+                self.write(b'400, bad request')
+                return
+        else:
+            self.send_response(404)
+            self.send_header('Content-Type', 'text/html')
+            self.end_headers()
+            self.wfile.write(b'404 content not found')
+            return
 
 def create_server():
     return HTTPServer(
