@@ -7,6 +7,10 @@ import html.parser
 
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+    """ Handle a get request from the client, and parse out their message to send back with a cow.
+        arg BaseHTTPRequestHandler
+        Also supply status messages and verify routes
+    """
     def do_GET(self):
         parsed_path = urlparse(self.path)
         parsed_qs = parse_qs(parsed_path.query)
@@ -76,6 +80,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
+        """ Handle a post request from the client, and parse out their message to send
+        back in the form of JSON
+        """
         parsed_path = urlparse(self.path)
         parsed_qs = parse_qs(parsed_path.query)
 
@@ -103,6 +110,8 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             return
 
 def create_server():
+    """ Create the server and set the address and port
+    """
     return HTTPServer(
         ('127.0.0.1', int(os.environ['PORT'])),
         SimpleHTTPRequestHandler
@@ -110,6 +119,9 @@ def create_server():
 
 
 def run_forever():
+    """ Start the server and run until there is a reason to stop
+    ie: Keyboard Interrupt
+    """
     server = create_server()
 
     try:
